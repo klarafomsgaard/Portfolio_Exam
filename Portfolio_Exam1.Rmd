@@ -1,0 +1,194 @@
+---
+title: "Portfolio Exam pt. 1"
+author: "Klara Krøyer Fomsgaard"
+date: "9/19/2019"
+output: html_document
+---
+
+```{r setup}
+knitr::opts_chunk$set(echo = TRUE, include = TRUE)
+```
+## Datamining report on the CogSci Intro Week Personality Test Data
+
+### Importing data
+I'd like to do datamining on the data of the CogSci Intro Week Personality Data.
+I import the data into R, and load the packages I need to use:
+```{r}
+personality_data <- read.csv("CogSciPersonalityTest2019.csv")
+pacman::p_load(tidyverse)
+```
+
+---
+
+#### Question 1
+
+I wish to look at the correlation between holding breath and right and left ocular dominance. I can use the ggplot2 package to visualise my data in a bar plot:
+```{r Question 1a}
+bh_od_plot <- ggplot(personality_data,aes(x = personality_data$ocular_dom,y = personality_data$breath_hold,fill = ocular_dom))
+
+bh_od_plot +
+  geom_bar(stat = "summary",fun.y = mean,width = 0.3) +
+  geom_errorbar(stat = "summary", fun.data = mean_se, width = 0.2) +
+  labs(x = "Ocular dominance", y = "Holding breath, sec") +
+  ggtitle("Correlation between ocular dominance and ability to hold breath") +
+  coord_cartesian(xlim = NULL,ylim = c(75,0)) +
+  theme_minimal()
+```
+
+I also find the values of the mean and standard deviation of the data. 
+```{r Question 1b}
+breath_hold_od <- personality_data %>%
+  group_by(ocular_dom) %>%
+  summarise(mean(breath_hold),sd(breath_hold), n())
+```
+
+Looking at the plot, I can see that on average it is the participants with a right ocular dominance that can hold their breath for the longest time i.e. around 58 seconds against 50 seconds for both and 53 for left dominance. That is confirmed by the numeric value of the means which are displayed in the table "breath_hold_od".
+
+I have found both the numeric value of the standard deviation and also visually displayed the standard error of the mean in error bars on the plot.
+I can see that the "right"-group has the smallest errorbar. This means that this is the group that is most likely to represent the distribution of the population best, assuming that the data does not include the whole population. The errorbar of the "left"-group is only a little larger, but the "both"-group errorbar is significantly bigger, which could be caused by the small number of people in the group (4 participants), making variation stand out more. 
+If I look at the standard deviation, the values are 18.7(both), 21.3(left) and 20.6 (right), which means that the "both"-group is the closet to be normally distributed, assuming that my sample is the whole population. That said, all three values are far from being 1, which is the value we would expect of a normal distribution. Of that I might conclude that the mean may not be a good fit for the data, and it would make sense to investigate if the data are normally distributed.  
+
+---
+
+#### Question 2
+
+Next I want to look at who likes silence vs. noise the best when grouping according to gender.
+I create a bar plot with SE-errorbars and calculate the means and standard deviation.
+```{r Question 2a}
+soundpref_gender <- ggplot(personality_data,aes(x = personality_data$gender,y = personality_data$sound_level_pref,fill = gender))
+
+soundpref_gender +
+  geom_bar(stat = "summary",fun.y = mean,width = 0.3) +
+  geom_errorbar(stat = "summary", fun.data = mean_se, width = 0.2) +
+  labs(x = "Gender", y = "Preferred sound level") +
+  ggtitle("Correlation between gender and the preference of soundlevel") +
+  coord_cartesian(xlim = NULL,ylim = c(40,0)) +
+  theme_minimal()
+```
+
+```{r}
+silence_vs_noise <- personality_data %>%
+  group_by(gender) %>% 
+  summarise(mean(sound_level_pref),sd(sound_level_pref))
+```
+
+The plot does not show a large difference between men and women when it comes to prefered soundlevel,though the male participants seem to in average prefer a soundlevel a bit above 25, while the female participants prefered a level just below 25. This is confirmed by the calculated means, which are 24.3 for females and 25.6 for males.
+The errorbar for the "female"-group is smaller than for the "male"-group, indicating that the posibility of the mean of this group being the same as the population is larger than for the male group. Looking at the standard deviation, the "female"-group is the group that, within the sample, is the closets to be normally distributed. It is worth to note, that both values, 14.6 (females) and 18.5 (males), deviate significantly from 1, and thereby from the value of a perfect normal distribution.
+This concludes that there is a slight difference in sound level preference when sample is treated like a normally distirbuted dataset, with females prefering a soundlevel a bit lower than males. 
+
+---
+
+#### Question 3
+
+I want to determine if the breath_hold data is normally distributed. 
+To do this, I first plot the data in a histogram and a Q-Q plot, using ggplot2:
+```{r}
+bh_normal_plot <-  ggplot(personality_data,aes(x = personality_data$breath_hold))
+
+bh_normal_plot + 
+  geom_histogram(aes(y = ..density..),binwidth = 0.5, fill = "steelblue3") + 
+  labs(x = "Number of seconds holding breath", y = "Density") + 
+  stat_function(fun = dnorm, args = list(mean = mean(personality_data$breath_hold, na.rm = TRUE), sd = sd(personality_data$breath_hold, na.rm = TRUE)), colour = "black", size = 1) +
+  theme_minimal()
+```
+```{r}
+ggplot(personality_data,aes(sample = breath_hold)) + 
+  stat_qq() +
+  stat_qq_line(colour = "red" ) + 
+  labs(x = "Theoretical", y = "Seconds")
+```
+I also test for normality using the stat.desc function and the Shapiro Wilks test:
+```{r}
+round(pastecs::stat.desc(personality_data$breath_hold, basic = FALSE, norm = TRUE), digits = 2)
+```
+The histogram show that the sample is slightly positively skewed, while the Q-Q-plot resembles a straight line with some deviating datapoints in both the lowest and highest z-scores. From these plots alone it is difficult to conclude whether the data is within the acceptable range of being a normal distribution, and so I look at the numeric values for the kurtosis, skewness and the p-value. The skew and kurtosis divided by two times the standard error are non-significant, as the values are respectively 0.95 and -0.30 at p <.05. But p = 0.04 in the Shapiro Wilks test, the data in the sample is significantly non-normal. This can also be explained by the fact that the measured variable is time, which excludes the possibility of negative scores. (This would explain the results in Question 1, where it was assumed that the data were normally distributed)
+
+This concludes that the data is close to being normally distributed, with different values pointing in different directions. It shows the importance of looking at the data with different methods.   
+
+---
+
+#### Question 4
+
+Are the Balloon reaction time data (balloon and balloon_balance) normally distributed? Provide visual and numeric support for your answer.
+I wish to determine if the Balloon reaction time data are normally distributed. The data is plotted into separate histograms and Q-Q-plots and displayed numerically using stat.desc. 
+
+##### Blow up balloon 
+```{r}
+balloon_plot <- ggplot(personality_data,aes(x = personality_data$balloon)) 
+
+balloon_plot + 
+  geom_histogram(aes(y = ..density..),binwidth = 0.6, fill = "steelblue3") + 
+  labs(x = "Number of seconds to blow up balloon", y = "Density") + 
+  stat_function(fun = dnorm, args = list(mean = mean(personality_data$balloon, na.rm = TRUE), sd = sd(personality_data$balloon, na.rm = TRUE)), colour = "black", size = 1) +
+  theme_minimal()
+
+ggplot(personality_data,aes(sample = personality_data$balloon)) + 
+  stat_qq() +
+  stat_qq_line(colour = "red" ) + 
+  labs(x = "Theoretical", y = "Seconds")
+```
+When looking at the two plots, it is clear that the data is positively skewed, with a few very high scores. 
+```{r}
+round(pastecs::stat.desc(personality_data$balloon, basic = FALSE, norm = TRUE), digits = 2)
+```
+The skewness and kurtosis divided by two times SE both have values above 1, that is 3.31 and 2.38 at p < .05, and so the conclusion is that the data is significantly non-normal. 
+
+##### Balloon balance
+```{r}
+bb_plot <- ggplot(personality_data,aes(x = personality_data$balloon_balance)) 
+
+bb_plot + 
+  geom_histogram(aes(y = ..density..),binwidth = 0.6, fill = "steelblue3") + 
+  labs(x = "Number of seconds balancing a balloon", y = "Density") + 
+  stat_function(fun = dnorm, args = list(mean = mean(personality_data$balloon_balance, na.rm = TRUE), sd = sd(personality_data$balloon_balance, na.rm = TRUE)), colour = "black", size = 1) +
+  theme_minimal()
+
+ggplot(personality_data,aes(sample = personality_data$balloon_balance)) + 
+  stat_qq() +
+  stat_qq_line(colour = "red" ) + 
+  labs(x = "Theoretical", y = "Seconds")
+```
+```{r}
+round(pastecs::stat.desc(personality_data$balloon_balance, basic = FALSE, norm = TRUE), digits = 2)
+```
+The histogram shows that the data is positively skewed as well, with some high scores as outliers. The Q-Q plot also assembles a curve more than a straight line, indicating that the data are not normally distributed.This is supported by the numeric values of skewness and the p-value which are 2.02 at p < .05, and so are not normally distributed, although the kurtosis fall within the normal values (-0.25). 
+
+This concludes that both the Balloon- and Balloon balance data are significantly non-normal.
+
+---
+
+#### Question 5
+
+I wish to investigate a possible correlation between shoesize and the ability to hold your breath, with the hypothesis that there is a positive relation between the variables.
+I plot the data in a scatterplot and add a linear regression using ggplot2:
+```{r Question 5}
+plot_ss_bh_linear <- ggplot(personality_data,aes(x = shoesize, y = breath_hold)) + 
+  geom_point() + 
+  geom_smooth(method = "lm") + 
+  labs(x = "Shoesize", y = "Holding breath, sec") + 
+  theme_minimal()
+```
+The plot shows an increase in ability to hold your breath as the shoesize gets bigger, as the linear model is a positive line. This supports the hypothesis of a positive relation between shoesize and holding breath. If I choose not to make the regression linear, the average according to shoesize looks like this:
+```{r}
+plot_ss_bh <- ggplot(personality_data,aes(x = shoesize, y = breath_hold)) + 
+  geom_point() + 
+  geom_smooth() + 
+  labs(x = "Shoesize", y = "Holding breath, sec") + 
+  theme_minimal()
+```
+The line displaying the mean have two high point, which indicates that the dataset is bimodal and includes two populations.
+I group the data according to gender, as this might be the reason: 
+```{r}
+plot_ss_bh_linear + 
+  aes(color = gender)
+```
+I can see that there is a significant difference between means of the female- and male participants. The women in average hold their breath for a shorter time than the men and also on average have smaller feet, which supports the hypothesis that shoesize and holding breath are connected. It is also clear that there is an increase in ability to holding breath when the shoesize increases when looking only at the female group of participants, but within the male group, the average is canstant across all shoesizes. This could be due to few participants with a large shoesize, which makes variation affect the result more. 
+
+Overall it can be concluded that the data support the hypothesis that there is a positive relation between shoesize (and bodysize) and the ability to hold your breath.
+
+
+
+
+
+
+
