@@ -10,7 +10,7 @@ knitr::opts_chunk$set(echo = TRUE, include = TRUE)
 ```
 ## Datamining report on the CogSci Intro Week Personality Test Data
 
-### Importing data
+#### Importing data
 I'd like to do datamining on the data of the CogSci Intro Week Personality Data.
 I import the data into R, and load the packages I need to use:
 ```{r}
@@ -46,7 +46,7 @@ Looking at the plot, I can see that on average it is the participants with a rig
 
 I have found both the numeric value of the standard deviation and also visually displayed the standard error of the mean in error bars on the plot.
 I can see that the "right"-group has the smallest errorbar. This means that this is the group that is most likely to represent the distribution of the population best, assuming that the data does not include the whole population. The errorbar of the "left"-group is only a little larger, but the "both"-group errorbar is significantly bigger, which could be caused by the small number of people in the group (4 participants), making variation stand out more. 
-If I look at the standard deviation, the values are 18.7(both), 21.3(left) and 20.6 (right), which means that the "both"-group is the closet to be normally distributed, assuming that my sample is the whole population. That said, all three values are far from being 1, which is the value we would expect of a normal distribution. Of that I can conclude that the mean may not be a good fit for the data, and it would make sense to investigate if the data are normally distributed.  
+If I look at the standard deviation, the values are 18.7(both), 21.3(left) and 20.6 (right), which means that the "both"-group is the closet to be normally distributed, assuming that my sample is the whole population. That said, all three values are far from being 1, which is the value we would expect of a normal distribution. Of that I can conclude that the mean may not be a good model of fit for the data, and it would make sense to investigate if the data are normally distributed.  
 
 ---
 
@@ -72,9 +72,9 @@ silence_vs_noise <- personality_data %>%
   summarise(mean(sound_level_pref),sd(sound_level_pref))
 ```
 
-The plot does not show a large difference between men and women when it comes to prefered soundlevel,though the male participants seem to in average prefer a soundlevel a bit above 25, while the female participants prefered a level just below 25. This is confirmed by the calculated means, which are 24.3 for females and 25.6 for males.
+The plot does not show a large difference between men and women when it comes to preferred soundlevel,though the male participants seem to in average prefer a soundlevel a bit above 25, while the female participants preferred a level just below 25. This is confirmed by the calculated means, which are 24.3 for females and 25.6 for males.
 The errorbar for the "female"-group is smaller than for the "male"-group, indicating that the posibility of the mean of this group being the same as the population is larger than for the male group. Looking at the standard deviation, the "female"-group is the group that, within the sample, is the closets to be normally distributed. It is worth to note, that both values, 14.6 (females) and 18.5 (males), deviate significantly from 1, and thereby from the value of a perfect normal distribution.
-This concludes that there is a slight difference in sound level preference when sample is treated like a normally distirbuted dataset, with females prefering a soundlevel a bit lower than males. 
+This concludes that there is a slight difference in sound level preference when sample is treated like a normally distributed dataset, with females preferring a soundlevel a bit lower than males. 
 
 ---
 
@@ -170,6 +170,8 @@ plot_ss_bh_linear <- ggplot(personality_data,aes(x = shoesize, y = breath_hold))
   geom_smooth(method = "lm") + 
   labs(x = "Shoesize", y = "Holding breath, sec") + 
   theme_minimal()
+
+plot_ss_bh_linear
 ```
 
 The plot shows an increase in ability to hold your breath as the shoesize gets bigger, as the linear model is a positive line. This supports the hypothesis of a positive relation between shoesize and holding breath. If I choose not to make the regression linear, the average according to shoesize looks like this:
@@ -179,6 +181,8 @@ plot_ss_bh <- ggplot(personality_data,aes(x = shoesize, y = breath_hold)) +
   geom_smooth() + 
   labs(x = "Shoesize", y = "Holding breath, sec") + 
   theme_minimal()
+
+plot_ss_bh
 ```
 
 The line displaying the mean have two high point, which indicates that the dataset is bimodal and includes two populations.
