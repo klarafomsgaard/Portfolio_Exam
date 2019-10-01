@@ -46,7 +46,7 @@ Looking at the plot, I can see that on average it is the participants with a rig
 
 I have found both the numeric value of the standard deviation and also visually displayed the standard error of the mean in error bars on the plot.
 I can see that the "right"-group has the smallest errorbar. This means that this is the group that is most likely to represent the distribution of the population best, assuming that the data does not include the whole population. The errorbar of the "left"-group is only a little larger, but the "both"-group errorbar is significantly bigger, which could be caused by the small number of people in the group (4 participants), making variation stand out more. 
-If I look at the standard deviation, the values are 18.7(both), 21.3(left) and 20.6 (right), which means that the "both"-group is the closet to be normally distributed, assuming that my sample is the whole population. That said, all three values are far from being 1, which is the value we would expect of a normal distribution. Of that I might conclude that the mean may not be a good fit for the data, and it would make sense to investigate if the data are normally distributed.  
+If I look at the standard deviation, the values are 18.7(both), 21.3(left) and 20.6 (right), which means that the "both"-group is the closet to be normally distributed, assuming that my sample is the whole population. That said, all three values are far from being 1, which is the value we would expect of a normal distribution. Of that I can conclude that the mean may not be a good fit for the data, and it would make sense to investigate if the data are normally distributed.  
 
 ---
 
@@ -97,11 +97,13 @@ ggplot(personality_data,aes(sample = breath_hold)) +
   stat_qq_line(colour = "red" ) + 
   labs(x = "Theoretical", y = "Seconds")
 ```
+
 I also test for normality using the stat.desc function and the Shapiro Wilks test:
 ```{r}
 round(pastecs::stat.desc(personality_data$breath_hold, basic = FALSE, norm = TRUE), digits = 2)
 ```
-The histogram show that the sample is slightly positively skewed, while the Q-Q-plot resembles a straight line with some deviating datapoints in both the lowest and highest z-scores. From these plots alone it is difficult to conclude whether the data is within the acceptable range of being a normal distribution, and so I look at the numeric values for the kurtosis, skewness and the p-value. The skew and kurtosis divided by two times the standard error are non-significant, as the values are respectively 0.95 and -0.30 at p <.05. But p = 0.04 in the Shapiro Wilks test, the data in the sample is significantly non-normal. This can also be explained by the fact that the measured variable is time, which excludes the possibility of negative scores. (This would explain the results in Question 1, where it was assumed that the data were normally distributed)
+
+The histogram show that the sample is slightly positively skewed, while the Q-Q-plot resembles a straight line with some deviating datapoints in both the lowest and highest z-scores. From these plots alone it is difficult to conclude whether the data is within the acceptable range of being a normal distribution, and so I look at the numeric values for the kurtosis, skewness and the p-value. The skew and kurtosis divided by two times the standard error are non-significant, as the values are respectively 0.95 and -0.30 at p <.05. The Shapiro Wilks test provides a p-value of 0.04, suggesting that the data is significantly non-normal. This can also be explained by the fact that the measured variable is time, which excludes the possibility of negative scores. (It would explain the results in Question 1, where it was assumed that the data were normally distributed)
 
 This concludes that the data is close to being normally distributed, with different values pointing in different directions. It shows the importance of looking at the data with different methods.   
 
@@ -109,7 +111,6 @@ This concludes that the data is close to being normally distributed, with differ
 
 #### Question 4
 
-Are the Balloon reaction time data (balloon and balloon_balance) normally distributed? Provide visual and numeric support for your answer.
 I wish to determine if the Balloon reaction time data are normally distributed. The data is plotted into separate histograms and Q-Q-plots and displayed numerically using stat.desc. 
 
 ##### Blow up balloon 
@@ -127,6 +128,7 @@ ggplot(personality_data,aes(sample = personality_data$balloon)) +
   stat_qq_line(colour = "red" ) + 
   labs(x = "Theoretical", y = "Seconds")
 ```
+
 When looking at the two plots, it is clear that the data is positively skewed, with a few very high scores. 
 ```{r}
 round(pastecs::stat.desc(personality_data$balloon, basic = FALSE, norm = TRUE), digits = 2)
@@ -151,6 +153,7 @@ ggplot(personality_data,aes(sample = personality_data$balloon_balance)) +
 ```{r}
 round(pastecs::stat.desc(personality_data$balloon_balance, basic = FALSE, norm = TRUE), digits = 2)
 ```
+
 The histogram shows that the data is positively skewed as well, with some high scores as outliers. The Q-Q plot also assembles a curve more than a straight line, indicating that the data are not normally distributed.This is supported by the numeric values of skewness and the p-value which are 2.02 at p < .05, and so are not normally distributed, although the kurtosis fall within the normal values (-0.25). 
 
 This concludes that both the Balloon- and Balloon balance data are significantly non-normal.
@@ -168,6 +171,7 @@ plot_ss_bh_linear <- ggplot(personality_data,aes(x = shoesize, y = breath_hold))
   labs(x = "Shoesize", y = "Holding breath, sec") + 
   theme_minimal()
 ```
+
 The plot shows an increase in ability to hold your breath as the shoesize gets bigger, as the linear model is a positive line. This supports the hypothesis of a positive relation between shoesize and holding breath. If I choose not to make the regression linear, the average according to shoesize looks like this:
 ```{r}
 plot_ss_bh <- ggplot(personality_data,aes(x = shoesize, y = breath_hold)) + 
@@ -176,12 +180,14 @@ plot_ss_bh <- ggplot(personality_data,aes(x = shoesize, y = breath_hold)) +
   labs(x = "Shoesize", y = "Holding breath, sec") + 
   theme_minimal()
 ```
+
 The line displaying the mean have two high point, which indicates that the dataset is bimodal and includes two populations.
 I group the data according to gender, as this might be the reason: 
 ```{r}
 plot_ss_bh_linear + 
   aes(color = gender)
 ```
+
 I can see that there is a significant difference between means of the female- and male participants. The women in average hold their breath for a shorter time than the men and also on average have smaller feet, which supports the hypothesis that shoesize and holding breath are connected. It is also clear that there is an increase in ability to holding breath when the shoesize increases when looking only at the female group of participants, but within the male group, the average is canstant across all shoesizes. This could be due to few participants with a large shoesize, which makes variation affect the result more. 
 
 Overall it can be concluded that the data support the hypothesis that there is a positive relation between shoesize (and bodysize) and the ability to hold your breath.
